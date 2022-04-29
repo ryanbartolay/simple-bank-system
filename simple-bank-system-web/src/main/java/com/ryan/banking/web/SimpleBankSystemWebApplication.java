@@ -1,4 +1,4 @@
-package com.ryan.banking;
+package com.ryan.banking.web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

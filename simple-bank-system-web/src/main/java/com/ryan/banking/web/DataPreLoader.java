@@ -1,4 +1,4 @@
-package com.ryan.banking;
+package com.ryan.banking.web;
 
 import javax.annotation.PostConstruct;
 import javax.money.CurrencyUnit;
