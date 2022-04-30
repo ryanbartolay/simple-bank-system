@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
 import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
-import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.NewTransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
 import com.ryan.banking.controller.dto.WithdrawDto;
 import com.ryan.banking.service.TransactionService;
@@ -28,7 +28,7 @@ public class TransactionRestController {
     private TransactionService transactionService;
 
     @PostMapping(value = "/new", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<NewTransactionDto> newTransaction(@Valid @RequestBody TransactionRequestDto txRequest)
+    public ResponseEntity<NewTransactionDto> newTransaction(@Valid @RequestBody NewTransactionRequestDto txRequest)
             throws Exception {
         return ResponseEntity.ok(transactionService.createTransaction(txRequest));
     }

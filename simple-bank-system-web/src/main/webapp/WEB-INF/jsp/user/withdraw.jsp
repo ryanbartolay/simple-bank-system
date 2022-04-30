@@ -46,9 +46,9 @@
   <c:url var="withdrawUrl" value="/transaction/withdraw" />
   <form:form action="${withdrawUrl}" method="post"
     modelAttribute="withdraw">
-    <form:input type="text" path="userId" value="${userId}" />
-    <form:input type="text" path="accountId" value="${accountId}" />
-    <form:input type="text" path="transactionId"
+    <form:input type="hidden" path="userId" value="${userId}" />
+    <form:input type="hidden" path="accountId" value="${accountId}" />
+    <form:input type="hidden" path="transactionId"
       value="${transactionId}" />
     <table>
       <tr>
@@ -56,9 +56,9 @@
         <td><input type="number" name="amount" /></td>
       </tr>
       <tr>
-        <td colspan="2" align="center"><input type="button"
-          value="Cancel"> <input type="submit" value="Withdraw">
-        </td>
+        <td colspan="2" align="center"><input type="submit"
+          name="transaction" value="Cancel" > <input
+          type="submit" name="transaction" value="Withdraw"></td>
       </tr>
     </table>
   </form:form>

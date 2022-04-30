@@ -4,6 +4,8 @@ import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
 import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.TransactionResultDto;
+import com.ryan.banking.controller.dto.NewTransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
 import com.ryan.banking.controller.dto.WithdrawDto;
 import com.ryan.banking.exception.AccountNotFoundException;
@@ -14,7 +16,7 @@ import com.ryan.banking.model.enums.TransactionStatus;
 
 public interface TransactionService {
 
-    NewTransactionDto createTransaction(TransactionRequestDto txRequest)
+    NewTransactionDto createTransaction(NewTransactionRequestDto txRequest)
             throws TransactionException, AccountNotFoundException;
 
     // TODO : Refactor with withdraw

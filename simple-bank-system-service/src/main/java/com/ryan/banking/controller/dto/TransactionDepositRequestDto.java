@@ -2,15 +2,17 @@ package com.ryan.banking.controller.dto;
 
 import java.util.UUID;
 
+import com.ryan.banking.model.enums.TransactionType;
+
 import lombok.Builder;
-import lombok.Data;
 
-@Builder
-@Data
-public class TransactionDepositRequestDto {
+@Deprecated // TODO  Check if this class is still necessary
+public class TransactionDepositRequestDto extends TransactionRequestDto {
 
-    private UUID userId;
-    private UUID accountId;
-    private UUID transactionId;
-    private Integer amount;
+    TransactionDepositRequestDto(UUID userId, UUID accountId, UUID transactionId, Integer amount, String transaction,
+            TransactionType type) {
+        super(userId, accountId, transactionId, amount, transaction, type);
+        // TODO Auto-generated constructor stub
+    }
+
 }

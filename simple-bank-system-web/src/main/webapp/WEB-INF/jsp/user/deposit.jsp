@@ -46,9 +46,9 @@
   <c:url var="depositUrl" value="/transaction/deposit" />
   <form:form action="${depositUrl}" method="post"
     modelAttribute="deposit">
-    <form:input type="text" path="userId" value="${userId}" />
-    <form:input type="text" path="accountId" value="${accountId}" />
-    <form:input type="text" path="transactionId"
+    <form:input type="hidden" path="userId" value="${userId}" />
+    <form:input type="hidden" path="accountId" value="${accountId}" />
+    <form:input type="hidden" path="transactionId"
       value="${transactionId}" />
     <table>
       <tr>
@@ -56,9 +56,9 @@
         <td><input type="number" name="amount" /></td>
       </tr>
       <tr>
-        <td colspan="2" align="center"><input type="button"
-          value="Cancel"> <input type="submit" value="Deposit">
-        </td>
+        <td colspan="2" align="center"><input type="submit"
+          value="Cancel" name="transaction"> <input
+          type="submit" value="Deposit" name="transaction"></td>
       </tr>
     </table>
   </form:form>

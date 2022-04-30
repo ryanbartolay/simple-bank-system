@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.ryan.banking.controller.dto.NewTransactionDto;
 import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.NewTransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
 import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.TransactionException;
@@ -57,12 +58,12 @@ public class UserController {
         model.addAttribute("user", userService.findUserById(userId));
         model.addAttribute("account", accountService.getAccountById(accountId));
         NewTransactionDto newTransactionDto = transactionService
-        .createTransaction(TransactionRequestDto.builder()
+        .createTransaction(NewTransactionRequestDto.builder()
                 .accountId(accountId)
                 .userId(userId)
                 .type(TransactionType.DEPOSIT)
                 .build());
-        model.addAttribute("deposit", TransactionDepositRequestDto.builder()
+        model.addAttribute("deposit", TransactionRequestDto.builder()
                 .userId(userId)
                 .accountId(accountId)
                 .transactionId(newTransactionDto.getId())
@@ -77,12 +78,12 @@ public class UserController {
         model.addAttribute("user", userService.findUserById(userId));
         model.addAttribute("account", accountService.getAccountById(accountId));
         NewTransactionDto newTransactionDto = transactionService
-                .createTransaction(TransactionRequestDto.builder()
+                .createTransaction(NewTransactionRequestDto.builder()
                 .accountId(accountId)
                 .userId(userId)
                 .type(TransactionType.WITHDRAW)
                 .build());
-        model.addAttribute("withdraw", TransactionWithdrawRequestDto.builder()
+        model.addAttribute("withdraw", TransactionRequestDto.builder()
                 .userId(userId)
                 .accountId(accountId)
                 .transactionId(newTransactionDto.getId())

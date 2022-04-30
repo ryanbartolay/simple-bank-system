@@ -22,6 +22,7 @@ import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
 import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.NewTransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
 import com.ryan.banking.controller.dto.WithdrawDto;
@@ -57,7 +58,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Caching(put = @CachePut(cacheNames = "transaction", key ="#result.id"),
             evict = @CacheEvict(cacheNames = "transactions", allEntries = true))
     @Override
-    public NewTransactionDto createTransaction(TransactionRequestDto txRequest) throws AccountNotFoundException, TransactionException {
+    public NewTransactionDto createTransaction(NewTransactionRequestDto txRequest) throws AccountNotFoundException, TransactionException {
         validateTransactionRequest(txRequest);
         Account account = accountService.getAccountByIdAndUser(txRequest.getAccountId(), txRequest.getUserId());
         Transaction tx = Transaction.builder()
@@ -133,7 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
         return TransactionStatus.COMPLETED.equals(txStatus);
     }
 
-    private void validateTransactionRequest(TransactionRequestDto txRequest) throws TransactionException {
+    private void validateTransactionRequest(NewTransactionRequestDto txRequest) throws TransactionException {
         if (ObjectUtils.isEmpty(txRequest)) {
             throw new TransactionException("Invalid Transaction Request");
         }
