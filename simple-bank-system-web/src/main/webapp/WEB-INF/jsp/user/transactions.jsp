@@ -9,13 +9,15 @@
 </head>
 <body>
   <h1>User Info</h1>
+  [<a href="/users/${user.id}">Back to accounts</a>]
+  <br><br>
   <table>
     <tr>
       <td valign="top"><table border="1">
           <tbody>
             <tr>
               <td>Email</td>
-              <td><a href="/users/${user.id}">${user.email}</a></td>
+              <td>${user.email}</td>
             </tr>
             <tr>
               <td>First name</td>

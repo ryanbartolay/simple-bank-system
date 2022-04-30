@@ -17,3 +17,5 @@ spring:
       suffix: .jsp
 bank:
   currency: USD
+  withdraw:
+    limit: 800

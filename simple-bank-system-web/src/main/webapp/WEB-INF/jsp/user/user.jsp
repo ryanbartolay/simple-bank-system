@@ -11,6 +11,8 @@
     <div style="color: green; font-weight: bold;">${successMessage}</div>
   </c:if>
   <h1>User Info</h1>
+  [<a href="/users">Back to users</a>]
+  <br><br>
   <table border="1">
     <tbody>
       <tr>

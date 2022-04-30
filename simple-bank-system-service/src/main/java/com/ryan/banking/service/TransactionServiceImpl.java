@@ -1,5 +1,7 @@
 package com.ryan.banking.service;
 
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -44,6 +46,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Value("${bank.currency}")
     private String bankCurrency;
 
+    @Value("${bank.withdraw.limit}")
+    private Integer withdrawLimit;
+
     @Autowired
     private AccountService accountService;
 
@@ -51,10 +56,17 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "transactions", key = "#account.id")
+    @Cacheable(cacheNames = "transactions", key = "{#account.id, #pageable}")
     @Override
     public Page<Transaction> findAllByAccount(Account account, Pageable pageable) {
         return transactionRepository.findAllByAccount(account, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "transactions", key = "#account.id")
+    @Override
+    public List<Transaction> findAllTransactionsTodayByAccount(Account account) {
+        return transactionRepository.findAllByAccountToday(account, new Date());
     }
 
     /**
@@ -86,7 +98,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "account", key = "#transactionRequestDto.accountId")
+    @Caching(evict = { 
+            @CacheEvict(cacheNames = "account", key = "#transactionRequestDto.accountId"),
+            @CacheEvict(cacheNames = "transactions", key = "#transactionRequestDto.accountId") })
     @Transactional(rollbackFor = Exception.class)
     @Override
     public TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto)
@@ -107,6 +121,7 @@ public class TransactionServiceImpl implements TransactionService {
                 func = account.getBalance()::add;
             } else if(TransactionRequestType.WITHDRAW.equals(transactionRequestDto.getType())) {
                 func = account.getBalance()::subtract;
+                validateWithdrawalLimit(account, transactionRequestDto, tx);
             }        
             DateTime now = DateTime.now();
             validateTransaction(tx);
@@ -187,6 +202,18 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (Exception e) {
             log.error("Error getting amount", e);
             throw new TransactionException("Transaction amount is invalid");
+        }
+    }
+
+    private void validateWithdrawalLimit(Account account, TransactionRequestDto transactionRequestDto,
+            Transaction transaction) throws TransactionException {
+        List<Transaction> alltx = findAllTransactionsTodayByAccount(account);
+        Money totalWithdrawal = alltx.stream()
+            .filter(tx -> TransactionStatus.COMPLETED.equals(tx.getStatus()))
+            .map(Transaction::getAmount)
+            .reduce(Money.of(0, bankCurrency), Money::add);
+        if (totalWithdrawal.add(transaction.getAmount()).isGreaterThan(Money.of(withdrawLimit, bankCurrency))) {
+            throw new TransactionException("Withdrawal limit up to " + Money.of(withdrawLimit, bankCurrency) + " per day only.");
         }
     }
 
