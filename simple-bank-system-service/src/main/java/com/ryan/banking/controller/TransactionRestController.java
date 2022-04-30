@@ -20,7 +20,7 @@ import com.ryan.banking.service.TransactionService;
 
 @RestController
 @ControllerAdvice
-@RequestMapping("/transaction")
+@RequestMapping("/rest/transaction")
 public class TransactionRestController {
 
     @Autowired

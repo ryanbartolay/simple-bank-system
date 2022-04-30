@@ -11,6 +11,8 @@ public interface AccountService {
 
     public List<Account> getAccountsByUser(User user);
 
+    public List<Account> getAccountsByUserId(UUID userId);
+
     public Account getAccountByIdAndUser(UUID id, User user) throws AccountNotFoundException;
 
     public Account getAccountByIdAndUser(UUID id, UUID userId) throws AccountNotFoundException;

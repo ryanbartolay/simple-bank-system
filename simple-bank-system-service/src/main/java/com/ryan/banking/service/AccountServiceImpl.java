@@ -29,6 +29,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Account> getAccountsByUserId(UUID userId) {
+        return getAccountsByUser(User.builder().id(userId).build());
+    }
+
+    @Override
     public Account getAccountByIdAndUser(UUID id, UUID userId) throws AccountNotFoundException {
         return getAccountByIdAndUser(id, User.builder().id(userId).build());
     }
