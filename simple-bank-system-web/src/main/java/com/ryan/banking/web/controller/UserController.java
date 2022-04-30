@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.ryan.banking.controller.dto.NewTransactionDto;
-import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
-import com.ryan.banking.controller.dto.TransactionRequestDto;
 import com.ryan.banking.controller.dto.NewTransactionRequestDto;
-import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
+import com.ryan.banking.controller.dto.TransactionRequestDto;
 import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;

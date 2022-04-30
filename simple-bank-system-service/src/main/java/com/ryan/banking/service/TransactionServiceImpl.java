@@ -18,14 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
-import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
-import com.ryan.banking.controller.dto.TransactionRequestDto;
 import com.ryan.banking.controller.dto.NewTransactionRequestDto;
+import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.TransactionRequestType;
 import com.ryan.banking.controller.dto.TransactionResultDto;
-import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
-import com.ryan.banking.controller.dto.WithdrawDto;
 import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.BalanceException;
 import com.ryan.banking.exception.TransactionException;
@@ -76,48 +73,30 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    // TODO : Refactor with withdraw
-    @CacheEvict(cacheNames = "account", key = "#txRequestDeposit.accountId")
+    @CacheEvict(cacheNames = "account", key = "#txRequest.accountId")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public DepositDto deposit(TransactionDepositRequestDto txRequestDeposit) throws TransactionException, UserNotFoundException, AccountNotFoundException {
-        Account account = accountService.getAccountByIdAndUser(txRequestDeposit.getAccountId(), txRequestDeposit.getUserId());
-        Transaction tx = transactionRepository.findById(txRequestDeposit.getTransactionId())
+    public TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto) throws TransactionException, UserNotFoundException, AccountNotFoundException  {
+        if (ObjectUtils.isEmpty(transactionRequestDto) || ObjectUtils.isEmpty(transactionRequestDto.getType())) {
+            throw new TransactionException("Invalid Transaction");
+        }
+        if (TransactionRequestType.CANCEL.equals(transactionRequestDto.getType())) {
+            // TODO Cancel transaction
+        }
+        Account account = accountService.getAccountByIdAndUser(transactionRequestDto.getAccountId(), transactionRequestDto.getUserId());
+        Transaction tx = transactionRepository.findById(transactionRequestDto.getTransactionId())
                 .orElseThrow(() -> new TransactionException("Transaction doesnt exists"));
         if (!tx.getAccount().equals(account)) {
             throw new TransactionException("Invalid Transaction");
         }
-        tx.setAmount(Money.of(txRequestDeposit.getAmount(), Monetary.getCurrency(bankCurrency)));
-        TransactionResultDto completedTx = transact(account, tx, account.getBalance()::add);
-        return DepositDto.builder()
-                .depositDate(completedTx.getCompletedDate())
-                .status(completedTx.getStatus())
-                .balance(completedTx.getRunningBalance())
-                .amount(tx.getAmount())
-                .remarks(completedTx.getRemarks())
-                .build();
-    }
-
-    // TODO : Refactor with deposit
-    @CacheEvict(cacheNames = "account", key = "#txRequestWithdraw.accountId")
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public WithdrawDto withdraw(TransactionWithdrawRequestDto txRequestWithdraw) throws TransactionException, UserNotFoundException, AccountNotFoundException {
-        Account account = accountService.getAccountByIdAndUser(txRequestWithdraw.getAccountId(), txRequestWithdraw.getUserId());
-        Transaction tx = transactionRepository.findById(txRequestWithdraw.getTransactionId())
-                .orElseThrow(() -> new TransactionException("Transaction doesnt exists"));
-        if (!tx.getAccount().equals(account)) {
-            throw new TransactionException("Invalid Transaction");
+        tx.setAmount(Money.of(transactionRequestDto.getAmount(), Monetary.getCurrency(bankCurrency)));
+        Function<Money, Money> func = null;
+        if (TransactionRequestType.DEPOSIT.equals(transactionRequestDto.getType())) {
+            func = account.getBalance()::add;
+        } else if(TransactionRequestType.WITHDRAW.equals(transactionRequestDto.getType())) {
+            func = account.getBalance()::subtract;
         }
-        tx.setAmount(Money.of(txRequestWithdraw.getAmount(), Monetary.getCurrency(bankCurrency)));
-        TransactionResultDto completedTx = transact(account, tx, account.getBalance()::subtract);
-        return WithdrawDto.builder()
-                .withdrawDate(completedTx.getCompletedDate())
-                .status(completedTx.getStatus())
-                .balance(completedTx.getRunningBalance())
-                .amount(tx.getAmount())
-                .remarks(completedTx.getRemarks())
-                .build();
+        return transact(account, tx, func);
     }
 
     @CachePut(cacheNames = "transaction", key ="#result.id")

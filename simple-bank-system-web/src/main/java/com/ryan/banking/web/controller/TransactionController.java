@@ -10,16 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.ryan.banking.controller.dto.DepositDto;
-import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
-import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
-import com.ryan.banking.controller.dto.WithdrawDto;
+import com.ryan.banking.controller.dto.TransactionRequestType;
+import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;
-import com.ryan.banking.model.Transaction;
-import com.ryan.banking.model.enums.TransactionType;
 import com.ryan.banking.service.TransactionService;
 
 @Controller
@@ -30,11 +26,11 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping(value = "/deposit")
-    public RedirectView addBook(@ModelAttribute("deposit") TransactionDepositRequestDto txRequestDeposit,
+    public RedirectView deposit(@ModelAttribute("deposit") TransactionRequestDto txRequestDeposit,
             RedirectAttributes redirectAttributes)
             throws TransactionException, UserNotFoundException, AccountNotFoundException {
         assignTransaction(txRequestDeposit);
-        DepositDto depositDto = transactionService.deposit(txRequestDeposit);
+        TransactionResultDto depositDto = transactionService.processTransactionRequest(txRequestDeposit);
         final RedirectView redirectView = new RedirectView("/users/" + txRequestDeposit.getUserId(), true);
         redirectAttributes.addFlashAttribute("depositDto", depositDto);
         redirectAttributes.addFlashAttribute("depositSuccess",
@@ -43,11 +39,11 @@ public class TransactionController {
     }
 
     @PostMapping(value = "/withdraw")
-    public RedirectView addBook(@ModelAttribute("withdrawRequest") TransactionWithdrawRequestDto txRequestWithdraw,
+    public RedirectView withdraw(@ModelAttribute("withdrawRequest") TransactionRequestDto txRequestWithdraw,
             RedirectAttributes redirectAttributes)
             throws TransactionException, UserNotFoundException, AccountNotFoundException {
         assignTransaction(txRequestWithdraw);
-        WithdrawDto withdrawDto = transactionService.withdraw(txRequestWithdraw);
+        TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
         final RedirectView redirectView = new RedirectView("/users/" + txRequestWithdraw.getUserId(), true);
         redirectAttributes.addFlashAttribute("withdrawDto", withdrawDto);
         redirectAttributes.addFlashAttribute("withdrawSuccess",
@@ -59,6 +55,6 @@ public class TransactionController {
         if (ObjectUtils.isEmpty(txRequest) || !StringUtils.hasText(txRequest.getTransaction())) {
             return;
         }
-        txRequest.setType(TransactionType.valueOf(StringUtils.capitalize(txRequest.getTransaction())));
+        txRequest.setType(TransactionRequestType.valueOf(StringUtils.capitalize(txRequest.getTransaction())));
     }
 }

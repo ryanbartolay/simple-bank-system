@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
-import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.NewTransactionRequestDto;
-import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
-import com.ryan.banking.controller.dto.WithdrawDto;
+import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.TransactionRequestType;
+import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.service.TransactionService;
 
 @RestController
@@ -34,15 +33,17 @@ public class TransactionRestController {
     }
 
     @PostMapping(value = "/deposit", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DepositDto> deposit(@Valid @RequestBody TransactionDepositRequestDto txRequestDeposit)
+    public ResponseEntity<TransactionResultDto> deposit(@Valid @RequestBody TransactionRequestDto txRequestDeposit)
             throws Exception {
-        return ResponseEntity.ok(transactionService.deposit(txRequestDeposit));
+        txRequestDeposit.setType(TransactionRequestType.DEPOSIT);
+        return ResponseEntity.ok(transactionService.processTransactionRequest(txRequestDeposit));
     }
 
     @PostMapping(value = "/withdraw", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<WithdrawDto> withdraw(@Valid @RequestBody TransactionWithdrawRequestDto txRequestWithdraw)
+    public ResponseEntity<TransactionResultDto> withdraw(@Valid @RequestBody TransactionRequestDto txRequestWithdraw)
             throws Exception {
-        return ResponseEntity.ok(transactionService.withdraw(txRequestWithdraw));
+        txRequestWithdraw.setType(TransactionRequestType.WITHDRAW);
+        return ResponseEntity.ok(transactionService.processTransactionRequest(txRequestWithdraw));
     }
 
 }
