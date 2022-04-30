@@ -172,15 +172,21 @@ public class TransactionServiceImpl implements TransactionService {
         }
         try {
             Integer amount = Integer.valueOf(transactionRequestDto.getAmount());
-            if (amount < 100 || amount > 10000) {
-                throw new TransactionException("Transaction amount should be between 100 up to 10000 only.");
+            if (TransactionRequestType.WITHDRAW.equals(transactionRequestDto.getType())) {
+                if (amount < 100 || amount > 10000) {
+                    throw new TransactionException("Withdraw amount should be between 100 up to 10000 only.");
+                }
+            } else if (TransactionRequestType.DEPOSIT.equals(transactionRequestDto.getType())) {
+                if (amount < 1000 || amount > 1000000) {
+                    throw new TransactionException("Deposit amount should be between 1000 up to 1000000 only.");
+                }
             }
             transaction.setAmount(Money.of(amount, Monetary.getCurrency(bankCurrency)));
         } catch (TransactionException te) {
             throw te; // allow throwing of TransactionException
         } catch (Exception e) {
             log.error("Error getting amount", e);
-            throw new TransactionException("Transaction amount is invalid (100 - 10000 only)");
+            throw new TransactionException("Transaction amount is invalid");
         }
     }
 

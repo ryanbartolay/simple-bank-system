@@ -2,6 +2,7 @@ package com.ryan.banking.web.dto.utils;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.springframework.util.ObjectUtils;
 
 import com.ryan.banking.controller.dto.TransactionDto;
 import com.ryan.banking.model.Transaction;
@@ -20,16 +21,19 @@ public class TransactionDtoUtility {
         if (TransactionStatus.COMPLETED.equals(transaction.getStatus()) || 
                 TransactionStatus.INVALID.equals(transaction.getStatus())) {
             if (TransactionType.WITHDRAW.equals(transaction.getType())) {
-                debitOrCredit = "-" + transaction.getAmount().getNumber();
+                debitOrCredit = !ObjectUtils.isEmpty(transaction.getAmount())
+                        ? transaction.getAmount().negate().getNumber().toString()
+                        : "";
                 balanceRunning = transaction.getBalanceRunning().getNumber().toString();
                 currency = transaction.getBalanceRunning().getCurrency().getCurrencyCode();
             } else if (TransactionType.DEPOSIT.equals(transaction.getType())) {
-                debitOrCredit = transaction.getAmount().getNumber().toString();
+                debitOrCredit = !ObjectUtils.isEmpty(transaction.getAmount())
+                        ? transaction.getAmount().getNumber().toString() : "";
                 balanceRunning = transaction.getBalanceRunning().getNumber().toString();
                 currency = transaction.getBalanceRunning().getCurrency().getCurrencyCode();
             }
         }
-        return TransactionDto.builder()
+        TransactionDto dto = TransactionDto.builder()
                 .date(DATEF.print(transaction.getCompletedDate()))
                 .time(TIMEF.print(transaction.getCompletedDate()))
                 .type(transaction.getType())
@@ -39,5 +43,6 @@ public class TransactionDtoUtility {
                 .currency(currency)
                 .balanceRunning(balanceRunning)
                 .build();
+         return dto;
     }
 }

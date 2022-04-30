@@ -18,9 +18,6 @@ import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.service.TransactionService;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Controller
 @RequestMapping("/transaction")
 public class TransactionController {
@@ -42,13 +39,8 @@ public class TransactionController {
             RedirectAttributes redirectAttributes)
             throws Exception {
         assignTransaction(txRequestWithdraw);
-        try {
-            TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
-            return buildRedirectView(txRequestWithdraw, withdrawDto, redirectAttributes);
-        } catch(Exception e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
+        TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
+        return buildRedirectView(txRequestWithdraw, withdrawDto, redirectAttributes);
     }
 
     private void assignTransaction(TransactionRequestDto txRequest) {
