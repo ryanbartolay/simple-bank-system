@@ -16,8 +16,11 @@
         cd simple-bank-system-web
         mvn spring-boot:run
 
-    > This will run the project as standalone,
-    > Table columns and Initial data will be installed.
+    Running the application includes:
+    - Creation of the database *bank*
+    - Creation of tables *account, transaction, user* and columns 
+    - Initialization of records
+    - This will run the project as standalone
 
 3. Open browser to **localhost:9012**
 
@@ -40,6 +43,7 @@ For you reference below are the default configuration and can be *overridden via
           password: ryan1234
           host: localhost
           port: 3307
+          name: bank
         bank:
           currency: USD
           withdraw:
