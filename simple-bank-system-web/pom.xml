@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.ryan.banking</groupId>
       <artifactId>simple-bank-system-service</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -43,11 +43,8 @@
       <artifactId>tomcat-embed-jasper</artifactId>
       <!-- <scope>provided</scope> -->
     </dependency>
-    <!-- <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-tomcat</artifactId>
-      <scope>provided</scope>
-    </dependency> -->
+    <!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-tomcat</artifactId> 
+      <scope>provided</scope> </dependency> -->
 
     <dependency>
       <groupId>org.projectlombok</groupId>

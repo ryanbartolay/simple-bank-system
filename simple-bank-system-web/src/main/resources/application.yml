@@ -1,5 +1,10 @@
 server:
   port: 9012
+db:
+  user: root
+  password: ryan1234
+  host: localhost
+  port: 3307
 spring:
   jpa:
     generate-ddl: true
@@ -8,9 +13,9 @@ spring:
     show-sql: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: ryan1234
-    url: jdbc:mysql://localhost:3307/bank
+    username: ${db.user}
+    password: ${db.password}
+    url: jdbc:mysql://${db.host}:${db.port}/bank
   mvc:
     view:
       prefix: /WEB-INF/jsp/
