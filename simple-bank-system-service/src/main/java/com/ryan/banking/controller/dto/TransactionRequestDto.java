@@ -12,7 +12,7 @@ public class TransactionRequestDto {
     private UUID userId;
     private UUID accountId;
     private UUID transactionId;
-    private Integer amount;
+    private String amount;
     private String transaction;
     private TransactionRequestType type;
 

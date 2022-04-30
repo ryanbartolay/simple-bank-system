@@ -35,6 +35,9 @@ import com.ryan.banking.model.Transaction;
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.repository.TransactionRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
@@ -51,7 +54,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Cacheable(cacheNames = "transactions", key = "#account.id")
     @Override
     public Page<Transaction> findAllByAccount(Account account, Pageable pageable) {
-//        return transactionRepository.findAll(pageable);
         return transactionRepository.findAllByAccount(account, pageable);
     }
 
@@ -67,7 +69,7 @@ public class TransactionServiceImpl implements TransactionService {
             evict = @CacheEvict(cacheNames = "transactions", allEntries = true))
     @Override
     public NewTransactionDto createTransaction(NewTransactionRequestDto txRequest) throws AccountNotFoundException, TransactionException {
-        validateTransactionRequest(txRequest);
+        validateRequestNewTransaction(txRequest);
         Account account = accountService.getAccountByIdAndUser(txRequest.getAccountId(), txRequest.getUserId());
         Transaction tx = Transaction.builder()
                 .id(UUID.randomUUID())
@@ -89,58 +91,23 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto)
             throws TransactionException, UserNotFoundException, AccountNotFoundException {
-        if (ObjectUtils.isEmpty(transactionRequestDto) || ObjectUtils.isEmpty(transactionRequestDto.getType())) {
-            throw new TransactionException("Invalid Transaction");
-        }
         Account account = accountService.getAccountByIdAndUser(transactionRequestDto.getAccountId(), transactionRequestDto.getUserId());
         Transaction tx = transactionRepository.findById(transactionRequestDto.getTransactionId())
                 .orElseThrow(() -> new TransactionException("Transaction doesnt exists"));
-        if (!tx.getAccount().equals(account)) {
-            throw new TransactionException("Invalid Transaction");
-        }
-        if (TransactionRequestType.CANCEL.equals(transactionRequestDto.getType())) {
-            return cancelTransaction(tx);
-        }
-        tx.setAmount(Money.of(transactionRequestDto.getAmount(), Monetary.getCurrency(bankCurrency)));
-        Function<Money, Money> func = null;
-        if (TransactionRequestType.DEPOSIT.equals(transactionRequestDto.getType())) {
-            func = account.getBalance()::add;
-        } else if(TransactionRequestType.WITHDRAW.equals(transactionRequestDto.getType())) {
-            func = account.getBalance()::subtract;
-        }
-        return transact(account, tx, func);
-    }
-
-    @CachePut(cacheNames = "transaction", key ="#result.id")
-    @Override
-    public Transaction save(Transaction transaction) {
-        return transactionRepository.save(transaction);
-    }
-
-    private TransactionResultDto cancelTransaction(Transaction tx) {
-        DateTime now = DateTime.now();
-        tx.setCompletedDate(now);
-        tx.setStatus(TransactionStatus.CANCELLED);
-        tx.setRemarks(tx.getType() + " " + TransactionStatus.CANCELLED);
-        tx = save(tx);
-        return TransactionResultDto.builder()
-                .status(tx.getStatus())
-                .completedDate(tx.getCompletedDate())
-                .build();
-    }
-
-    private void validateTransactionRequest(NewTransactionRequestDto txRequest) throws TransactionException {
-        if (ObjectUtils.isEmpty(txRequest)) {
-            throw new TransactionException("Invalid Transaction Request");
-        }
-        if (ObjectUtils.isEmpty(txRequest.getType())) {
-            throw new TransactionException("Transaction Type is Required");
-        }
-    }
-
-    private TransactionResultDto transact(Account account, Transaction tx, Function<Money, Money> func)
-            throws TransactionException {
         try {
+            if (TransactionRequestType.CANCEL.equals(transactionRequestDto.getType())) {
+                return cancelTransaction(tx);
+            }
+            validateTransactionRequest(transactionRequestDto, tx);
+            if (!tx.getAccount().equals(account)) {
+                throw new TransactionException("Invalid Transaction");
+            }
+            Function<Money, Money> func = null;
+            if (TransactionRequestType.DEPOSIT.equals(transactionRequestDto.getType())) {
+                func = account.getBalance()::add;
+            } else if(TransactionRequestType.WITHDRAW.equals(transactionRequestDto.getType())) {
+                func = account.getBalance()::subtract;
+            }        
             DateTime now = DateTime.now();
             validateTransaction(tx);
             Money newBalance = func.apply(tx.getAmount());
@@ -169,6 +136,52 @@ public class TransactionServiceImpl implements TransactionService {
                 .type(tx.getType())
                 .remarks(tx.getRemarks())
                 .build();
+    }
+
+    @CachePut(cacheNames = "transaction", key ="#result.id")
+    @Override
+    public Transaction save(Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
+    private TransactionResultDto cancelTransaction(Transaction tx) {
+        DateTime now = DateTime.now();
+        tx.setCompletedDate(now);
+        tx.setStatus(TransactionStatus.CANCELLED);
+        tx.setRemarks(tx.getType() + " " + TransactionStatus.CANCELLED);
+        tx = save(tx);
+        return TransactionResultDto.builder()
+                .status(tx.getStatus())
+                .completedDate(tx.getCompletedDate())
+                .build();
+    }
+
+    private void validateRequestNewTransaction(NewTransactionRequestDto txRequest) throws TransactionException {
+        if (ObjectUtils.isEmpty(txRequest)) {
+            throw new TransactionException("Invalid Transaction Request");
+        }
+        if (ObjectUtils.isEmpty(txRequest.getType())) {
+            throw new TransactionException("Transaction Type is Required");
+        }
+    }
+
+    private void validateTransactionRequest(TransactionRequestDto transactionRequestDto, Transaction transaction)
+            throws TransactionException {
+        if (ObjectUtils.isEmpty(transactionRequestDto) || ObjectUtils.isEmpty(transactionRequestDto.getType())) {
+            throw new TransactionException("Invalid Transaction");
+        }
+        try {
+            Integer amount = Integer.valueOf(transactionRequestDto.getAmount());
+            if (amount < 100 || amount > 10000) {
+                throw new TransactionException("Transaction amount should be between 100 up to 10000 only.");
+            }
+            transaction.setAmount(Money.of(amount, Monetary.getCurrency(bankCurrency)));
+        } catch (TransactionException te) {
+            throw te; // allow throwing of TransactionException
+        } catch (Exception e) {
+            log.error("Error getting amount", e);
+            throw new TransactionException("Transaction amount is invalid (100 - 10000 only)");
+        }
     }
 
     private void validateTransaction(Transaction tx) throws TransactionException {

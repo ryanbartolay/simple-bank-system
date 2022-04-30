@@ -1,5 +1,7 @@
 package com.ryan.banking.web.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
@@ -27,7 +29,7 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping(value = "/deposit")
-    public RedirectView deposit(@ModelAttribute("deposit") TransactionRequestDto txRequestDeposit,
+    public RedirectView deposit(@Valid @ModelAttribute("deposit") TransactionRequestDto txRequestDeposit,
             RedirectAttributes redirectAttributes)
             throws Exception {
         assignTransaction(txRequestDeposit);
@@ -36,7 +38,7 @@ public class TransactionController {
     }
 
     @PostMapping(value = "/withdraw")
-    public RedirectView withdraw(@ModelAttribute("withdrawRequest") TransactionRequestDto txRequestWithdraw,
+    public RedirectView withdraw(@Valid @ModelAttribute("withdrawRequest") TransactionRequestDto txRequestWithdraw,
             RedirectAttributes redirectAttributes)
             throws Exception {
         assignTransaction(txRequestWithdraw);
