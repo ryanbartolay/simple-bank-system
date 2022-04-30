@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -44,6 +47,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "transactions", key = "#account.id")
+    @Override
+    public Page<Transaction> findAllByAccount(Account account, Pageable pageable) {
+//        return transactionRepository.findAll(pageable);
+        return transactionRepository.findAllByAccount(account, pageable);
+    }
+
     /**
      * Creates and returns new Transaction
      *
@@ -73,21 +84,22 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    @CacheEvict(cacheNames = "account", key = "#txRequest.accountId")
+    @CacheEvict(cacheNames = "account", key = "#transactionRequestDto.accountId")
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto) throws TransactionException, UserNotFoundException, AccountNotFoundException  {
+    public TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto)
+            throws TransactionException, UserNotFoundException, AccountNotFoundException {
         if (ObjectUtils.isEmpty(transactionRequestDto) || ObjectUtils.isEmpty(transactionRequestDto.getType())) {
             throw new TransactionException("Invalid Transaction");
-        }
-        if (TransactionRequestType.CANCEL.equals(transactionRequestDto.getType())) {
-            // TODO Cancel transaction
         }
         Account account = accountService.getAccountByIdAndUser(transactionRequestDto.getAccountId(), transactionRequestDto.getUserId());
         Transaction tx = transactionRepository.findById(transactionRequestDto.getTransactionId())
                 .orElseThrow(() -> new TransactionException("Transaction doesnt exists"));
         if (!tx.getAccount().equals(account)) {
             throw new TransactionException("Invalid Transaction");
+        }
+        if (TransactionRequestType.CANCEL.equals(transactionRequestDto.getType())) {
+            return cancelTransaction(tx);
         }
         tx.setAmount(Money.of(transactionRequestDto.getAmount(), Monetary.getCurrency(bankCurrency)));
         Function<Money, Money> func = null;
@@ -105,12 +117,16 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    @Override
-    public boolean isTransactionCompleted(TransactionStatus txStatus) {
-        if (ObjectUtils.isEmpty(txStatus)) {
-            return false;
-        }
-        return TransactionStatus.COMPLETED.equals(txStatus);
+    private TransactionResultDto cancelTransaction(Transaction tx) {
+        DateTime now = DateTime.now();
+        tx.setCompletedDate(now);
+        tx.setStatus(TransactionStatus.CANCELLED);
+        tx.setRemarks(tx.getType() + " " + TransactionStatus.CANCELLED);
+        tx = save(tx);
+        return TransactionResultDto.builder()
+                .status(tx.getStatus())
+                .completedDate(tx.getCompletedDate())
+                .build();
     }
 
     private void validateTransactionRequest(NewTransactionRequestDto txRequest) throws TransactionException {
@@ -147,8 +163,10 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return TransactionResultDto.builder()
                 .status(tx.getStatus())
+                .amount(tx.getAmount())
                 .runningBalance(tx.getBalanceRunning())
                 .completedDate(tx.getCompletedDate())
+                .type(tx.getType())
                 .remarks(tx.getRemarks())
                 .build();
     }

@@ -83,7 +83,7 @@ public class DataPreLoader {
         CurrencyUnit currencyUnit = currencyUnitConverter.convertToEntityAttribute(bankCurrency);
         account10 = Account.builder()
                 .type(AccountType.SAVINGS)
-                .balance(Money.of(500, bankCurrency))
+                .balance(Money.of(1000, bankCurrency))
                 .currency(currencyUnit)
                 .dateCreated(now)
                 .user(user1)
@@ -118,7 +118,7 @@ public class DataPreLoader {
                 .balanceStarting(Money.of(0, bankCurrency))
                 .balanceRunning(Money.of(1000, bankCurrency))
                 .expirationDate(now.plusMinutes(3))
-                .completedDate(now.plusMinutes(2))
+                .completedDate(now)
                 .type(TransactionType.DEPOSIT)
                 .status(TransactionStatus.COMPLETED)
                 .build();

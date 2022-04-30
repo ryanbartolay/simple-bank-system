@@ -1,8 +1,5 @@
 package com.ryan.banking.controller.dto;
 
-import org.javamoney.moneta.Money;
-import org.joda.time.DateTime;
-
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.model.enums.TransactionType;
 
@@ -11,13 +8,16 @@ import lombok.Data;
 
 @Builder
 @Data
-public class TransactionResultDto {
+public class TransactionDto {
 
+    private String balanceRunning;
+    private String completedDate;
+    private String date;
+    private String time;
+    private String debitOrCredit;
+    private String remarks;
+    private String currency;
     private TransactionStatus status;
     private TransactionType type;
-    private String remarks;
-    private DateTime completedDate;
-    private Money runningBalance;
-    private Money amount;
 
 }

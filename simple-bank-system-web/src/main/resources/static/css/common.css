@@ -1,10 +1,13 @@
+body {
+  font-family: arial, sans-serif;
+}
+
 table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 td, th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
 }

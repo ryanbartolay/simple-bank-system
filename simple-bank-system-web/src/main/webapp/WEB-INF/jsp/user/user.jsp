@@ -7,24 +7,9 @@
   type="text/css">
 </head>
 <body>
-  <c:choose>
-    <c:when test="${depositSuccess}">
-      <div style="color: green; font-weight: bold;">Successfully
-        withdraw: ${depostiDto.amount}</div>
-    </c:when>
-    <c:otherwise>
-      <div style="color: red; font-weight: bold;">${depositDto.remarks}</div>
-    </c:otherwise>
-  </c:choose>
-  <c:choose>
-    <c:when test="${withdrawSuccess}">
-      <div style="color: green; font-weight: bold;">Successfully
-        withdraw: ${withdrawDto.amount}</div>
-    </c:when>
-    <c:otherwise>
-      <div style="color: red; font-weight: bold;">${withdrawDto.remarks}</div>
-    </c:otherwise>
-  </c:choose>
+  <c:if test="${transactionSuccess}">
+    <div style="color: green; font-weight: bold;">${successMessage}</div>
+  </c:if>
   <h1>User Info</h1>
   <table border="1">
     <tbody>
@@ -53,7 +38,9 @@
     <tbody>
       <c:forEach items="${accounts}" var="account">
         <tr>
-          <td>${account.type}<br>${account.id}</td>
+          <td>${account.type}<br>
+          <a
+            href="/users/${user.id}/transactions/${account.id}?page=0&size=5&sort=completedDate,desc">${account.id}</a></td>
           <td>${account.balance}</td>
           <td>
             <table border="1">

@@ -8,6 +8,9 @@
   type="text/css">
 </head>
 <body>
+  <c:if test="${transactionFailed}">
+    <div style="color: red; font-weight: bold;">${failedMessage}</div>
+  </c:if>
   <h1>Deposit</h1>
   <table>
     <tr>

@@ -3,15 +3,12 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <html>
 <head>
-<title>View Users</title>
+<title>View User Transactions</title>
 <link href="<c:url value="/css/common.css"/>" rel="stylesheet"
   type="text/css">
 </head>
 <body>
-  <c:if test="${transactionFailed}">
-    <div style="color: red; font-weight: bold;">${failedMessage}</div>
-  </c:if>
-  <h1>Withdraw</h1>
+  <h1>User Info</h1>
   <table>
     <tr>
       <td valign="top"><table border="1">
@@ -46,24 +43,28 @@
         </table></td>
     </tr>
   </table>
-  <c:url var="withdrawUrl" value="/transaction/withdraw" />
-  <form:form action="${withdrawUrl}" method="post"
-    modelAttribute="withdraw">
-    <form:input type="hidden" path="userId" value="${userId}" />
-    <form:input type="hidden" path="accountId" value="${accountId}" />
-    <form:input type="hidden" path="transactionId"
-      value="${transactionId}" />
-    <table>
+  <h1>Transactions</h1>
+  <table border="1">
+    <thead>
       <tr>
-        <td>Withdraw amount</td>
-        <td><input type="number" name="amount" /></td>
+        <th>Date</th>
+        <th>Remarks</th>
+        <th>Currency</th>
+        <th>Debit/Credit</th>
+        <th>Running Balance</th>
       </tr>
-      <tr>
-        <td colspan="2" align="center"><input type="submit"
-          name="transaction" value="Cancel"> <input
-          type="submit" name="transaction" value="Withdraw"></td>
-      </tr>
-    </table>
-  </form:form>
+    </thead>
+    <tbody>
+      <c:forEach items="${transactions}" var="transaction">
+        <tr>
+          <td align="center" width="100">${transaction.date}<br/>${transaction.time}</td>
+          <td width="400">${transaction.remarks}</td>
+          <td>${transaction.currency}</td>
+          <td>${transaction.debitOrCredit}</td>
+          <td>${transaction.balanceRunning}</td>
+        </tr>
+      </c:forEach>
+    </tbody>
+  </table>
 </body>
 </html>

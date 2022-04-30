@@ -13,11 +13,12 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestType;
 import com.ryan.banking.controller.dto.TransactionResultDto;
-import com.ryan.banking.exception.AccountNotFoundException;
-import com.ryan.banking.exception.TransactionException;
-import com.ryan.banking.exception.UserNotFoundException;
+import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.service.TransactionService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("/transaction")
 public class TransactionController {
@@ -28,33 +29,55 @@ public class TransactionController {
     @PostMapping(value = "/deposit")
     public RedirectView deposit(@ModelAttribute("deposit") TransactionRequestDto txRequestDeposit,
             RedirectAttributes redirectAttributes)
-            throws TransactionException, UserNotFoundException, AccountNotFoundException {
+            throws Exception {
         assignTransaction(txRequestDeposit);
         TransactionResultDto depositDto = transactionService.processTransactionRequest(txRequestDeposit);
-        final RedirectView redirectView = new RedirectView("/users/" + txRequestDeposit.getUserId(), true);
-        redirectAttributes.addFlashAttribute("depositDto", depositDto);
-        redirectAttributes.addFlashAttribute("depositSuccess",
-                transactionService.isTransactionCompleted(depositDto.getStatus()));
-        return redirectView;
+        return buildRedirectView(txRequestDeposit, depositDto, redirectAttributes);
     }
 
     @PostMapping(value = "/withdraw")
     public RedirectView withdraw(@ModelAttribute("withdrawRequest") TransactionRequestDto txRequestWithdraw,
             RedirectAttributes redirectAttributes)
-            throws TransactionException, UserNotFoundException, AccountNotFoundException {
+            throws Exception {
         assignTransaction(txRequestWithdraw);
-        TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
-        final RedirectView redirectView = new RedirectView("/users/" + txRequestWithdraw.getUserId(), true);
-        redirectAttributes.addFlashAttribute("withdrawDto", withdrawDto);
-        redirectAttributes.addFlashAttribute("withdrawSuccess",
-                transactionService.isTransactionCompleted(withdrawDto.getStatus()));
-        return redirectView;
+        try {
+            TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
+            return buildRedirectView(txRequestWithdraw, withdrawDto, redirectAttributes);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void assignTransaction(TransactionRequestDto txRequest) {
         if (ObjectUtils.isEmpty(txRequest) || !StringUtils.hasText(txRequest.getTransaction())) {
             return;
         }
-        txRequest.setType(TransactionRequestType.valueOf(StringUtils.capitalize(txRequest.getTransaction())));
+        txRequest.setType(TransactionRequestType.valueOf(txRequest.getTransaction().toUpperCase()));
+    }
+
+    private RedirectView buildRedirectView(TransactionRequestDto transactionRequest,
+            TransactionResultDto transactionResultDto, RedirectAttributes redirectAttributes) throws Exception {
+        String redirectPath = "/users/" + transactionRequest.getUserId();
+        final RedirectView redirectView = new RedirectView(redirectPath, true);
+        if (TransactionStatus.CANCELLED.equals(transactionResultDto.getStatus())) {
+            // Do nothing
+        } else if (TransactionStatus.COMPLETED.equals(transactionResultDto.getStatus())) {
+            redirectAttributes.addFlashAttribute("resultDto", transactionResultDto);
+            redirectAttributes.addFlashAttribute("transactionSuccess", true);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Successfully " + transactionRequest.getType().toString().toLowerCase() + " : "
+                            + transactionResultDto.getAmount());
+        } else if (TransactionStatus.INVALID.equals(transactionResultDto.getStatus())) {
+            String back = "/users/" + transactionRequest.getUserId() + "/"
+                    + transactionRequest.getType().toString().toLowerCase() + "/" + transactionRequest.getAccountId();
+            redirectView.setUrl(back);
+            redirectAttributes.addFlashAttribute("resultDto", transactionResultDto);
+            redirectAttributes.addFlashAttribute("transactionFailed", true);
+            redirectAttributes.addFlashAttribute("failedMessage", transactionResultDto.getRemarks());
+        } else {
+            throw new Exception("This transaction is not handled");
+        }
+        return redirectView;
     }
 }

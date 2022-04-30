@@ -7,6 +7,7 @@
   type="text/css">
 </head>
 <body>
+  <h1>View Users</h1>
   <table border="1">
     <thead>
       <tr>
