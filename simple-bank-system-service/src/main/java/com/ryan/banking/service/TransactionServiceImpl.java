@@ -16,7 +16,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import com.ryan.banking.controller.dto.DepositDto;
@@ -31,7 +30,6 @@ import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;
 import com.ryan.banking.model.Account;
 import com.ryan.banking.model.Transaction;
-import com.ryan.banking.model.User;
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.repository.TransactionRepository;
 
@@ -46,9 +44,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
-    @Autowired
-    private UserService userService;
 
     /**
      * Creates and returns new Transaction
@@ -98,19 +93,17 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+    @CacheEvict(cacheNames = "account", key = "#txRequestWithdraw.accountId")
     @Transactional(rollbackFor = Exception.class)
     @Override
     public WithdrawDto withdraw(TransactionWithdrawRequestDto txRequestWithdraw) throws TransactionException, UserNotFoundException, AccountNotFoundException {
-        User user = userService.findUserById(txRequestWithdraw.getUserId());
-        if (CollectionUtils.isEmpty(user.getAccounts())) {
-            throw new TransactionException("This User Account doesnt exists");
-        }
-        Account account = accountService.getAccountByIdAndUser(txRequestWithdraw.getAccountId(), user);
+        Account account = accountService.getAccountByIdAndUser(txRequestWithdraw.getAccountId(), txRequestWithdraw.getUserId());
         Transaction tx = transactionRepository.findById(txRequestWithdraw.getTransactionId())
                 .orElseThrow(() -> new TransactionException("Transaction doesnt exists"));
         if (!tx.getAccount().equals(account)) {
             throw new TransactionException("Invalid Transaction");
         }
+        tx.setAmount(Money.of(txRequestWithdraw.getAmount(), Monetary.getCurrency(bankCurrency)));
         Transaction completedTx = transact(account, tx, account.getBalance()::subtract);
         return WithdrawDto.builder()
                 .withdrawDate(completedTx.getCompletedDate())

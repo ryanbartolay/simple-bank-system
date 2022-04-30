@@ -24,16 +24,6 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @PostMapping(value = "/withdraw")
-    public RedirectView addBook(@ModelAttribute("withdrawRequest") TransactionWithdrawRequestDto txRequestWithdraw,
-            RedirectAttributes redirectAttributes)
-            throws TransactionException, UserNotFoundException, AccountNotFoundException {
-        WithdrawDto withdrawDto = transactionService.withdraw(txRequestWithdraw);
-        final RedirectView redirectView = new RedirectView("/user" + txRequestWithdraw.getUserId(), true);
-        redirectAttributes.addFlashAttribute("withdrawSuccess", true);
-        return redirectView;
-    }
-
     @PostMapping(value = "/deposit")
     public RedirectView addBook(@ModelAttribute("deposit") TransactionDepositRequestDto txRequestDeposit,
             RedirectAttributes redirectAttributes)
@@ -41,6 +31,16 @@ public class TransactionController {
         DepositDto depositDto = transactionService.deposit(txRequestDeposit);
         final RedirectView redirectView = new RedirectView("/users/" + txRequestDeposit.getUserId(), true);
         redirectAttributes.addFlashAttribute("depositSuccess", true);
+        return redirectView;
+    }
+
+    @PostMapping(value = "/withdraw")
+    public RedirectView addBook(@ModelAttribute("withdrawRequest") TransactionWithdrawRequestDto txRequestWithdraw,
+            RedirectAttributes redirectAttributes)
+            throws TransactionException, UserNotFoundException, AccountNotFoundException {
+        WithdrawDto withdrawDto = transactionService.withdraw(txRequestWithdraw);
+        final RedirectView redirectView = new RedirectView("/users/" + txRequestWithdraw.getUserId(), true);
+        redirectAttributes.addFlashAttribute("withdrawSuccess", true);
         return redirectView;
     }
 }

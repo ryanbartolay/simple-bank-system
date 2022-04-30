@@ -43,25 +43,24 @@
         </table></td>
     </tr>
   </table>
-  <form:form action="${add_book_url}" method="post"
-    modelAttribute="transaction">
-    <form:input type="text" path="userId" value="${user.id}"/>
-    <form:input type="text" path="accountId"  value="${account.id}"/>
-    <form:input type="text" path="transactionId"  value="${transaction.id}"/>
+  <c:url var="withdrawUrl" value="/transaction/withdraw" />
+  <form:form action="${withdrawUrl}" method="post"
+    modelAttribute="withdraw">
+    <form:input type="text" path="userId" value="${userId}" />
+    <form:input type="text" path="accountId" value="${accountId}" />
+    <form:input type="text" path="transactionId"
+      value="${transactionId}" />
     <table>
       <tr>
         <td>Withdraw amount</td>
         <td><input type="number" name="amount" /></td>
       </tr>
       <tr>
-        <td colspan="2" align="center">
-            <input type="button" value="Cancel"> <input type="button" value="Withdraw">
+        <td colspan="2" align="center"><input type="button"
+          value="Cancel"> <input type="submit" value="Withdraw">
         </td>
       </tr>
     </table>
   </form:form>
-  <br />
-  <br />
-  <span>TX ID ${transaction.id}</span>
 </body>
 </html>

@@ -44,7 +44,8 @@
     </tr>
   </table>
   <c:url var="depositUrl" value="/transaction/deposit" />
-  <form:form action="${depositUrl}" method="post" modelAttribute="deposit">
+  <form:form action="${depositUrl}" method="post"
+    modelAttribute="deposit">
     <form:input type="text" path="userId" value="${userId}" />
     <form:input type="text" path="accountId" value="${accountId}" />
     <form:input type="text" path="transactionId"
