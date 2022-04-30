@@ -115,6 +115,8 @@ public class DataPreLoader {
                 .account(account10)
                 .amount(Money.of(1000, bankCurrency))
                 .startDate(now)
+                .balanceStarting(Money.of(0, bankCurrency))
+                .balanceRunning(Money.of(1000, bankCurrency))
                 .expirationDate(now.plusMinutes(3))
                 .completedDate(now.plusMinutes(2))
                 .type(TransactionType.DEPOSIT)

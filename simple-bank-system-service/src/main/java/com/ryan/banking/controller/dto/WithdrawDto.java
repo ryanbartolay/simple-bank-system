@@ -14,5 +14,8 @@ public class WithdrawDto {
 
     private DateTime withdrawDate;
     private TransactionStatus status;
+    private Money amount;
     private Money balance;
+    private String remarks;
+
 }

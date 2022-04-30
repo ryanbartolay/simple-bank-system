@@ -30,7 +30,9 @@ public class TransactionController {
             throws TransactionException, UserNotFoundException, AccountNotFoundException {
         DepositDto depositDto = transactionService.deposit(txRequestDeposit);
         final RedirectView redirectView = new RedirectView("/users/" + txRequestDeposit.getUserId(), true);
-        redirectAttributes.addFlashAttribute("depositSuccess", true);
+        redirectAttributes.addFlashAttribute("depositDto", depositDto);
+        redirectAttributes.addFlashAttribute("depositSuccess",
+                transactionService.isTransactionCompleted(depositDto.getStatus()));
         return redirectView;
     }
 
@@ -40,7 +42,9 @@ public class TransactionController {
             throws TransactionException, UserNotFoundException, AccountNotFoundException {
         WithdrawDto withdrawDto = transactionService.withdraw(txRequestWithdraw);
         final RedirectView redirectView = new RedirectView("/users/" + txRequestWithdraw.getUserId(), true);
-        redirectAttributes.addFlashAttribute("withdrawSuccess", true);
+        redirectAttributes.addFlashAttribute("withdrawDto", withdrawDto);
+        redirectAttributes.addFlashAttribute("withdrawSuccess",
+                transactionService.isTransactionCompleted(withdrawDto.getStatus()));
         return redirectView;
     }
 }

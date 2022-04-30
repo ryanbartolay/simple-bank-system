@@ -22,6 +22,7 @@ import com.ryan.banking.controller.dto.DepositDto;
 import com.ryan.banking.controller.dto.NewTransactionDto;
 import com.ryan.banking.controller.dto.TransactionDepositRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
+import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.controller.dto.TransactionWithdrawRequestDto;
 import com.ryan.banking.controller.dto.WithdrawDto;
 import com.ryan.banking.exception.AccountNotFoundException;
@@ -74,6 +75,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
+    // TODO : Refactor with withdraw
     @CacheEvict(cacheNames = "account", key = "#txRequestDeposit.accountId")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -85,14 +87,17 @@ public class TransactionServiceImpl implements TransactionService {
             throw new TransactionException("Invalid Transaction");
         }
         tx.setAmount(Money.of(txRequestDeposit.getAmount(), Monetary.getCurrency(bankCurrency)));
-        Transaction completedTx = transact(account, tx, account.getBalance()::add);
+        TransactionResultDto completedTx = transact(account, tx, account.getBalance()::add);
         return DepositDto.builder()
                 .depositDate(completedTx.getCompletedDate())
                 .status(completedTx.getStatus())
                 .balance(completedTx.getRunningBalance())
+                .amount(tx.getAmount())
+                .remarks(completedTx.getRemarks())
                 .build();
     }
 
+    // TODO : Refactor with deposit
     @CacheEvict(cacheNames = "account", key = "#txRequestWithdraw.accountId")
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -104,11 +109,13 @@ public class TransactionServiceImpl implements TransactionService {
             throw new TransactionException("Invalid Transaction");
         }
         tx.setAmount(Money.of(txRequestWithdraw.getAmount(), Monetary.getCurrency(bankCurrency)));
-        Transaction completedTx = transact(account, tx, account.getBalance()::subtract);
+        TransactionResultDto completedTx = transact(account, tx, account.getBalance()::subtract);
         return WithdrawDto.builder()
                 .withdrawDate(completedTx.getCompletedDate())
                 .status(completedTx.getStatus())
                 .balance(completedTx.getRunningBalance())
+                .amount(tx.getAmount())
+                .remarks(completedTx.getRemarks())
                 .build();
     }
 
@@ -116,6 +123,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction save(Transaction transaction) {
         return transactionRepository.save(transaction);
+    }
+
+    @Override
+    public boolean isTransactionCompleted(TransactionStatus txStatus) {
+        if (ObjectUtils.isEmpty(txStatus)) {
+            return false;
+        }
+        return TransactionStatus.COMPLETED.equals(txStatus);
     }
 
     private void validateTransactionRequest(TransactionRequestDto txRequest) throws TransactionException {
@@ -127,16 +142,35 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private Transaction transact(Account account, Transaction tx, Function<Money, Money> func)
+    private TransactionResultDto transact(Account account, Transaction tx, Function<Money, Money> func)
             throws TransactionException {
-        validateTransaction(tx);
-        Money newBalance = func.apply(tx.getAmount());
-        validateNewBalance(newBalance);
-        tx.setRunningBalance(newBalance);
-        account.setBalance(newBalance);
-        tx.setCompletedDate(DateTime.now());
-        accountService.save(account);
-        return save(tx);
+        try {
+            DateTime now = DateTime.now();
+            validateTransaction(tx);
+            Money newBalance = func.apply(tx.getAmount());
+            validateNewBalance(newBalance);
+            account.setBalance(newBalance);
+            account.setDateLastUpdate(now);
+            tx.setBalanceRunning(newBalance);
+            tx.setBalanceStarting(account.getBalance());
+            tx.setCompletedDate(now);
+            tx.setStatus(TransactionStatus.COMPLETED);
+            accountService.save(account);
+            tx = save(tx);
+        } catch (Exception e) {
+            tx.setBalanceRunning(account.getBalance());
+            tx.setBalanceStarting(account.getBalance());
+            tx.setCompletedDate(DateTime.now());
+            tx.setStatus(TransactionStatus.INVALID);
+            tx.setRemarks(e.getMessage());
+            tx = save(tx);
+        }
+        return TransactionResultDto.builder()
+                .status(tx.getStatus())
+                .runningBalance(tx.getBalanceRunning())
+                .completedDate(tx.getCompletedDate())
+                .remarks(tx.getRemarks())
+                .build();
     }
 
     private void validateTransaction(Transaction tx) throws TransactionException {
@@ -149,15 +183,15 @@ public class TransactionServiceImpl implements TransactionService {
         }
         CurrencyUnit currencyUnit = Monetary.getCurrency(bankCurrency);
         MonetaryAmount invalidAmount = Money.of(0, currencyUnit);
-        if (tx.getAmount().isLessThanOrEqualTo(invalidAmount)) {
-            throw new TransactionException("No valid amount to transact");
+        if (tx.getAmount().isLessThan(invalidAmount)) {
+            throw new TransactionException("Insufficient funds");
         }
     }
 
     private void validateNewBalance(Money money) throws BalanceException {
         MonetaryAmount dollars = Money.of(0, bankCurrency);
         if (money.isLessThan(dollars)) {
-            throw new BalanceException("Balance is below 0 after transaction");
+            throw new BalanceException("Insufficient funds");
         }
     }
 

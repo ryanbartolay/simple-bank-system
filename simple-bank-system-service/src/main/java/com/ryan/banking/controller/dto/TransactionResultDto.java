@@ -10,12 +10,11 @@ import lombok.Data;
 
 @Builder
 @Data
-public class DepositDto {
+public class TransactionResultDto {
 
-    private DateTime depositDate;
     private TransactionStatus status;
-    private Money amount;
-    private Money balance;
     private String remarks;
+    private DateTime completedDate;
+    private Money runningBalance;
 
 }

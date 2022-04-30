@@ -58,9 +58,12 @@ public class Transaction {
     @Column(name = "amount")
     @Convert(converter = MoneyAmountAttributeConverter.class)
     private Money amount;
-    @Column(name = "running_balance", updatable = true)
+    @Column(name = "balance_starting", updatable = true)
     @Convert(converter = MoneyAmountAttributeConverter.class)
-    private Money runningBalance;
+    private Money balanceStarting;
+    @Column(name = "balance_running", updatable = true)
+    @Convert(converter = MoneyAmountAttributeConverter.class)
+    private Money balanceRunning;
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Convert(converter = TransactionStatusConverter.class)
@@ -74,4 +77,6 @@ public class Transaction {
     @Column(name = "completed_date", updatable = true)
     @Convert(converter = DateTimeConverter.class)
     private DateTime completedDate;
+    @Column(name = "remarks", updatable = true, columnDefinition = "text")
+    private String remarks;
 }
