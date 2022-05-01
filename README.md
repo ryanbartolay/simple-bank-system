@@ -7,9 +7,13 @@
 
 ## Setup
 
-1. Run Project under *simple-bank-system-web* module.
+1. Build Project (from root directory)
 
-        cd simple-bank-system/simple-bank-system-web
+        mvn clean install package
+
+2. Run Project under *simple-bank-system-web* module.
+
+        cd simple-bank-system-web
         mvn spring-boot:run
 
     Running the application includes:
@@ -31,7 +35,7 @@ There are 2 branches
 
 You can override default configuration via command line parameters
 
-        mvn spring-boot:run -Ddb.user=root -Ddb.password=ryan1234 -Ddb.host=localhost -Ddb.port=3007
+        mvn spring-boot:run -Dspring-boot.run.arguments='--db.user=root --db.password=ryan1234 --db.host=localhost --db.port=3307'
 
 You can find the application default settings under **simple-bank-system-web/src/main/resources/application.yml**
 
