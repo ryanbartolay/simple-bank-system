@@ -24,8 +24,8 @@
 
 There are 2 branches
 
-- **main** - using spring mvc only
-- **feature/rest_implementation** - consuming of rest endpoints
+- **main** - using spring mvc + consuming of rest endpoints
+- **feature/spring_mvc** -  using spring mvc only
 
 ## Override default configuration
 

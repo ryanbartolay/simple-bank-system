@@ -1,5 +1,6 @@
 package com.ryan.banking.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -65,7 +66,7 @@ public class UserRestController {
                         .collect(Collectors.toList()))
                     .build());
         }
-        return ResponseEntity.ok(DatatableDto.builder().build());
+        return ResponseEntity.ok(DatatableDto.builder().data(Collections.emptyList()).build());
     }
 
     @GetMapping(value = "/{userId}/accounts", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,7 +80,7 @@ public class UserRestController {
                     .collect(Collectors.toList()))
                     .build());
         }
-        return ResponseEntity.ok(DatatableDto.builder().build());
+        return ResponseEntity.ok(DatatableDto.builder().data(Collections.emptyList()).build());
     }
 
     @GetMapping(value = "/{userId}/account/{accountId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -105,7 +106,7 @@ public class UserRestController {
                                         .map(TransactionUtility::toTransactionDto).collect(Collectors.toList()))
                                 .build());
             }
-            return ResponseEntity.ok(DatatableDto.builder().build());
+            return ResponseEntity.ok(DatatableDto.builder().data(Collections.emptyList()).build());
         } catch (Exception e) {
             throw new RestUserNotFoundException(e.getMessage());
         }
