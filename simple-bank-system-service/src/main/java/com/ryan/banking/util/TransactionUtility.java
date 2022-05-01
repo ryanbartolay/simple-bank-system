@@ -1,4 +1,4 @@
-package com.ryan.banking.web.dto.utils;
+package com.ryan.banking.util;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -9,7 +9,7 @@ import com.ryan.banking.model.Transaction;
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.model.enums.TransactionType;
 
-public class TransactionDtoUtility {
+public class TransactionUtility {
 
     public static final DateTimeFormatter DATEF = DateTimeFormat.forPattern("MMM dd");
     public static final DateTimeFormatter TIMEF = DateTimeFormat.forPattern("HH:mm");

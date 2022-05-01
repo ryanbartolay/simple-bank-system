@@ -4,23 +4,21 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.ryan.banking.controller.DefaultTransactionController;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
-import com.ryan.banking.controller.dto.TransactionRequestType;
 import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.model.enums.TransactionStatus;
 import com.ryan.banking.service.TransactionService;
 
 @Controller
 @RequestMapping("/transaction")
-public class TransactionController {
+public class TransactionController implements DefaultTransactionController {
 
     @Autowired
     private TransactionService transactionService;
@@ -41,13 +39,6 @@ public class TransactionController {
         assignTransaction(txRequestWithdraw);
         TransactionResultDto withdrawDto = transactionService.processTransactionRequest(txRequestWithdraw);
         return buildRedirectView(txRequestWithdraw, withdrawDto, redirectAttributes);
-    }
-
-    private void assignTransaction(TransactionRequestDto txRequest) {
-        if (ObjectUtils.isEmpty(txRequest) || !StringUtils.hasText(txRequest.getTransaction())) {
-            return;
-        }
-        txRequest.setType(TransactionRequestType.valueOf(txRequest.getTransaction().toUpperCase()));
     }
 
     private RedirectView buildRedirectView(TransactionRequestDto transactionRequest,

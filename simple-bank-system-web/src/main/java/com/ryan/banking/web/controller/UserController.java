@@ -1,11 +1,8 @@
 package com.ryan.banking.web.controller;
 
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,13 +17,11 @@ import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;
 import com.ryan.banking.model.Account;
-import com.ryan.banking.model.Transaction;
 import com.ryan.banking.model.User;
 import com.ryan.banking.model.enums.TransactionType;
 import com.ryan.banking.service.AccountService;
 import com.ryan.banking.service.TransactionService;
 import com.ryan.banking.service.UserService;
-import com.ryan.banking.web.dto.utils.TransactionDtoUtility;
 
 @Controller
 @RequestMapping("/users")
@@ -104,12 +99,6 @@ public class UserController {
         Account account = accountService.getAccountById(accountId);
         model.addAttribute("user", user);
         model.addAttribute("account", account);
-        Page<Transaction> pageableTransactions = transactionService.findAllByAccount(account, pageable);
-        model.addAttribute("transactions", pageableTransactions.stream()
-                .filter(Objects::nonNull)
-                .map(TransactionDtoUtility::toTransactionDto)
-                .collect(Collectors.toList()));
-        model.addAttribute("page", pageableTransactions.getPageable());
         return "user/transactions";
     }
 
