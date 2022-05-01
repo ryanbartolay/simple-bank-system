@@ -16,6 +16,7 @@
   <p>
     <span>This page is not available.</span>
     <br />
+    <a href="/">Home</a>
     <a href="/users">View Users</a>
   </p>
 

@@ -30,6 +30,7 @@ import com.ryan.banking.controller.dto.TransactionRequestType;
 import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.exception.AccountNotFoundException;
 import com.ryan.banking.exception.BalanceException;
+import com.ryan.banking.exception.RestTransactionException;
 import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;
 import com.ryan.banking.model.Account;
@@ -60,6 +61,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<Transaction> findAllByAccount(Account account, Pageable pageable) {
         return transactionRepository.findAllByAccount(account, pageable);
+    }
+
+    @Override
+    public List<Transaction> findAllByAccount(Account account) {
+        return transactionRepository.findAllByAccount(account);
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +102,17 @@ public class TransactionServiceImpl implements TransactionService {
                 .id(tx.getId())
                 .txDate(tx.getStartDate())
                 .build();
+    }
+
+    @Override
+    public TransactionResultDto processRESTTransactionRequest(TransactionRequestDto transactionRequestDto)
+            throws RestTransactionException, TransactionException, UserNotFoundException, AccountNotFoundException {
+        TransactionResultDto txResult = processTransactionRequest(transactionRequestDto);
+        if (TransactionStatus.COMPLETED.equals(txResult.getStatus())
+                || TransactionStatus.CANCELLED.equals(txResult.getStatus())) {
+            return txResult;
+        }
+        throw new RestTransactionException(txResult.getRemarks());
     }
 
     @Caching(evict = { 
@@ -223,7 +240,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         if (!ObjectUtils.isEmpty(tx.getStatus())
                 && !tx.getStatus().equals(TransactionStatus.NEW)) {
-            throw new TransactionException("Requires NEW transaction");
+            throw new TransactionException("This transaction is already closed.");
         }
         CurrencyUnit currencyUnit = Monetary.getCurrency(bankCurrency);
         MonetaryAmount invalidAmount = Money.of(0, currencyUnit);

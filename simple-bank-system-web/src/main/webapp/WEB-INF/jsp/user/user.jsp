@@ -5,11 +5,14 @@
 <title>View Users</title>
 <link href="<c:url value="/css/common.css"/>" rel="stylesheet"
   type="text/css">
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css"
+  rel="stylesheet">
+<link
+  href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css"
+  rel="stylesheet">
 </head>
 <body>
-  <c:if test="${transactionSuccess}">
-    <div style="color: green; font-weight: bold;">${successMessage}</div>
-  </c:if>
   <h1>User Info</h1>
   [<a href="/users">Back to users</a>]
   <br><br>
@@ -57,6 +60,5 @@
         </tr>
       </c:forEach>
     </tbody>
-  </table>
 </body>
 </html>

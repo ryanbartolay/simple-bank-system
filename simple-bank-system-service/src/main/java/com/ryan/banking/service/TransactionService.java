@@ -10,6 +10,7 @@ import com.ryan.banking.controller.dto.NewTransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionRequestDto;
 import com.ryan.banking.controller.dto.TransactionResultDto;
 import com.ryan.banking.exception.AccountNotFoundException;
+import com.ryan.banking.exception.RestTransactionException;
 import com.ryan.banking.exception.TransactionException;
 import com.ryan.banking.exception.UserNotFoundException;
 import com.ryan.banking.model.Account;
@@ -19,10 +20,15 @@ public interface TransactionService {
 
     Page<Transaction> findAllByAccount(Account account, Pageable pageable);
 
+    List<Transaction> findAllByAccount(Account account);
+
     List<Transaction> findAllTransactionsTodayByAccount(Account account);
 
     NewTransactionDto createTransaction(NewTransactionRequestDto txRequest)
             throws TransactionException, AccountNotFoundException;
+
+    TransactionResultDto processRESTTransactionRequest(TransactionRequestDto transactionRequestDto)
+            throws RestTransactionException, TransactionException, UserNotFoundException, AccountNotFoundException;
 
     TransactionResultDto processTransactionRequest(TransactionRequestDto transactionRequestDto)
             throws TransactionException, UserNotFoundException, AccountNotFoundException;

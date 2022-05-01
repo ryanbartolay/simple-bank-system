@@ -23,35 +23,37 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 <script type="text/javascript">
 	$(function() {
-		var table = $('#example')
-				.DataTable(
-					{
-						"ajax" : {
-							"url" : "/rest/users",
-							"type" : "GET",
-							"datatype" : 'json',
-						},
-						columns : [
-								{
-									'data' : 'email',
-									render : function(data, type, row) {
-										console.log(row);
-										return '<a href="/users/'+ row['id'] +'" target="_blank">'
-												+ data + '</a>'
-									}
-								}, {
-									'data' : 'firstname'
-								}, {
-									'data' : 'lastname'
-								}, ],
-					});
+		var table = $('#example').DataTable({
+			"ajax" : {
+				"url" : "/rest/users",
+				"type" : "GET", // you can probably remove this
+				"datatype" : 'json', // you can probably remove this
+			},
+			columns : [{
+				'data' : 'email'
+			}, {
+				'data' : 'firstname'
+			}, {
+				'data' : 'lastname'
+			}, ]
+		});
+		$('#example tbody').on('click', 'tr', function() {
+			var data = table.row(this).data();
+			$.get("/rest/users/"  + data['id'] + "/accounts", function(html) {
+			    console.log(html);
+				$("#modal").modal("show");
+			});
+		});
 	});
 </script>
 </head>
 <body>
+  <!-- AJAX response must be wrapped in the modal's root class. -->
+  <div class="modal" id="modal">
+    <p>Second AJAX Example!</p>
+  </div>
   <h1>View Users</h1>
-  <table id="example" class="table table-striped table-bordered"
-    style="width: 100%">
+  <table id="example"  class="table table-striped table-bordered" style="width: 100%">
     <thead>
       <tr>
         <th>Email</th>
@@ -59,6 +61,13 @@
         <th>Lastname</th>
       </tr>
     </thead>
+    <tfoot>
+      <tr>
+        <th>Email</th>
+        <th>Firstname</th>
+        <th>Lastname</th>
+      </tr>
+    </tfoot>
   </table>
 </body>
 </html>
