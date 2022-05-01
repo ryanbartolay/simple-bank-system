@@ -48,3 +48,10 @@ For you reference below are the default configuration and can be *overridden via
           currency: USD
           withdraw:
             limit: 800
+
+## Branches
+
+There are 2 branches
+
+- main branch - using spring mvc only
+- feature/rest_implementation - consuming of rest endpoints
