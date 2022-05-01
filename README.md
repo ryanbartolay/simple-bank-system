@@ -7,13 +7,9 @@
 
 ## Setup
 
-1. Build Project (from root directory)
+1. Run Project under *simple-bank-system-web* module.
 
-        mvn clean install package
-
-2. Run Project under *simple-bank-system-web* module.
-
-        cd simple-bank-system-web
+        cd simple-bank-system/simple-bank-system-web
         mvn spring-boot:run
 
     Running the application includes:
@@ -22,7 +18,14 @@
     - Initialization of records
     - This will run the project as standalone
 
-3. Open browser to **localhost:9012**
+2. Open browser to **localhost:9012**
+
+## Branches
+
+There are 2 branches
+
+- **main** - using spring mvc only
+- **feature/rest_implementation** - consuming of rest endpoints
 
 ## Override default configuration
 
@@ -48,10 +51,3 @@ For you reference below are the default configuration and can be *overridden via
           currency: USD
           withdraw:
             limit: 800
-
-## Branches
-
-There are 2 branches
-
-- main branch - using spring mvc only
-- feature/rest_implementation - consuming of rest endpoints
