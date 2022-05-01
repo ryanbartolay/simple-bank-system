@@ -46,10 +46,33 @@ public class DataPreLoader {
             .firstname("Kristoffer")
             .lastname("Bartolay")
             .build();
-
+    User user4 = User.builder()
+            .email("bartolay.joenna@gmail.com")
+            .firstname("Joenna")
+            .lastname("Bartolay")
+            .build();
+    User user5 = User.builder()
+            .email("ericahmad@gmail.com")
+            .firstname("Eric")
+            .lastname("Ahmad")
+            .build();
+    User user6 = User.builder()
+            .email("kenosp@gmail.com")
+            .firstname("Keno")
+            .lastname("San Pedro")
+            .build();
     Account account10 = null;
     Account account20 = null;
     Account account21 = null;
+    Account account22 = null;
+    Account account23 = null;
+    Account account24 = null;
+    Account account25 = null;
+    Account account26 = null;
+    Account account27 = null;
+    Account account28 = null;
+    Account account29 = null;
+    Account account30 = null;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -77,6 +100,12 @@ public class DataPreLoader {
         log.info(user2.toString());
         user3 = userRepository.save(user3);
         log.info(user3.toString());
+        user4 = userRepository.save(user4);
+        log.info(user4.toString());
+        user5 = userRepository.save(user5);
+        log.info(user5.toString());
+        user6 = userRepository.save(user6);
+        log.info(user6.toString());
     }
 
     private void initAccounts() {
@@ -108,6 +137,59 @@ public class DataPreLoader {
         log.info(account20.toString());
         account21 = accountRepository.save(account21);
         log.info(account21.toString());
+        // User 3
+        account24 = accountRepository.save(Account.builder()
+                .type(AccountType.SAVINGS)
+                .balance(Money.of(0, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user3)
+                .build());
+        account25 = accountRepository.save(Account.builder()
+                .type(AccountType.CHECKINGS)
+                .balance(Money.of(1500, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user3)
+                .build());
+        account26 = accountRepository.save(Account.builder()
+                .type(AccountType.SAVINGS)
+                .balance(Money.of(5000, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user3)
+                .build());
+        // User 4
+        account27 = accountRepository.save(Account.builder()
+                .type(AccountType.CHECKINGS)
+                .balance(Money.of(10500, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user4)
+                .build());
+        // User 5
+        account28 = accountRepository.save(Account.builder()
+                .type(AccountType.SAVINGS)
+                .balance(Money.of(5000, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user5)
+                .build());
+        // User 6
+        account29 = accountRepository.save(Account.builder()
+                .type(AccountType.CHECKINGS)
+                .balance(Money.of(1500, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user6)
+                .build());
+        account30 = accountRepository.save(Account.builder()
+                .type(AccountType.SAVINGS)
+                .balance(Money.of(5000, bankCurrency))
+                .currency(currencyUnit)
+                .dateCreated(now)
+                .user(user6)
+                .build());
     }
 
     private void initTransactions() {
