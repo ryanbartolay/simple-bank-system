@@ -98,6 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .filter(Objects::nonNull)
                     .filter(t -> !ObjectUtils.isEmpty(t.getExpirationDate()))
                     .filter(t -> DateTime.now().isBefore(t.getExpirationDate()))
+                    .filter(t -> t.getType().equals(txRequest.getType()))
                     .findAny()
                     .orElse(null);
         }
