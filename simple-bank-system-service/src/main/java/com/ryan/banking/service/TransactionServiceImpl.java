@@ -2,6 +2,7 @@ package com.ryan.banking.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import com.ryan.banking.controller.dto.NewTransactionDto;
@@ -89,15 +91,27 @@ public class TransactionServiceImpl implements TransactionService {
     public NewTransactionDto createTransaction(NewTransactionRequestDto txRequest) throws AccountNotFoundException, TransactionException {
         validateRequestNewTransaction(txRequest);
         Account account = accountService.getAccountByIdAndUser(txRequest.getAccountId(), txRequest.getUserId());
-        Transaction tx = Transaction.builder()
-                .id(UUID.randomUUID())
-                .startDate(DateTime.now())
-                .expirationDate(DateTime.now().plusMinutes(3))
-                .status(TransactionStatus.NEW)
-                .type(txRequest.getType())
-                .account(account)
-                .build();
-        tx = transactionRepository.save(tx);
+        List<Transaction> transactions = transactionRepository.findAllByAccountAndStatus(account, TransactionStatus.NEW);
+        Transaction tx = null;
+        if (!CollectionUtils.isEmpty(transactions)) {
+            tx = transactions.stream()
+                    .filter(Objects::nonNull)
+                    .filter(t -> !ObjectUtils.isEmpty(t.getExpirationDate()))
+                    .filter(t -> DateTime.now().isBefore(t.getExpirationDate()))
+                    .findAny()
+                    .orElse(null);
+        }
+        if (ObjectUtils.isEmpty(tx)) {
+            tx = Transaction.builder()
+                    .id(UUID.randomUUID())
+                    .startDate(DateTime.now())
+                    .expirationDate(DateTime.now().plusMinutes(3))
+                    .status(TransactionStatus.NEW)
+                    .type(txRequest.getType())
+                    .account(account)
+                    .build();
+            tx = transactionRepository.save(tx);
+        }
         return NewTransactionDto.builder()
                 .id(tx.getId())
                 .txDate(tx.getStartDate())
